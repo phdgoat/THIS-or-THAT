@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>This or That</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --surface-2: #22222d;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.18);
+    --text: #f0eff4;
+    --text-muted: #8b8a9a;
+    --text-dim: #4a4960;
+    --accent-a: #6c63ff;
+    --accent-a-light: #ede8ff;
+    --accent-b: #00c9a7;
+    --accent-b-light: #d4f7f0;
+    --accent-a-bg: rgba(108,99,255,0.12);
+    --accent-b-bg: rgba(0,201,167,0.12);
+    --radius: 12px;
+    --radius-lg: 18px;
+    --radius-pill: 999px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem 4rem;
+  }
+
+  /* header */
+  header {
+    width: 100%;
+    max-width: 560px;
+    padding: 2.5rem 0 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .logo span.slash {
+    color: var(--accent-a);
+    margin: 0 2px;
+  }
+
+  .logo-tag {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* screens */
+  .screen { display: none; width: 100%; max-width: 560px; }
+  .screen.active { display: block; }
+
+  /* cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  /* typography */
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  p, .body {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  /* inputs */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin: 1.25rem 0 1rem;
+  }
+
+  input[type=text] {
+    flex: 1;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  input[type=text]:focus { border-color: var(--accent-a); }
+  input[type=text]::placeholder { color: var(--text-dim); }
+
+  /* buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface-2); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .btn-accent {
+    background: var(--accent-a);
+    border-color: var(--accent-a);
+    color: #fff;
+  }
+  .btn-accent:hover { background: #7c75ff; border-color: #7c75ff; color: #fff; }
+
+  .btn-full {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 18px;
+    font-size: 15px;
+  }
+
+  /* player chips */
+  .players-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+    margin-bottom: 0.75rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    animation: popIn 0.15s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .chip .x {
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height: 1;
+    margin-left: 2px;
+  }
+  .chip .x:hover { color: #ff6b6b; }
+
+  /* join hint */
+  .hint {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* progress */
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .meta-label { font-size: 13px; color: var(--text-dim); font-family: 'Space Mono', monospace; }
+
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+    border-radius: 2px;
+    transition: width 0.35s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* question */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-text {
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 1.5rem;
+  }
+
+  /* who's voting */
+  .who-label {
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .player-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 1.25rem;
+  }
+
+  .player-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .player-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .player-btn.active { background: var(--accent-a-bg); border-color: var(--accent-a); color: #a09bff; }
+  .player-btn.done { border-color: transparent; color: var(--text-dim); background: transparent; cursor: default; }
+  .player-btn.done::after { content: '✓'; margin-left: 4px; font-size: 11px; color: var(--accent-b); }
+
+  .waiting-msg {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    font-style: italic;
+    min-height: 16px;
+  }
+
+  /* vote buttons */
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .opt-btn {
+    padding: 18px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+    width: 100%;
+    line-height: 1.3;
+  }
+
+  .opt-btn:hover { border-color: var(--border-hover); background: var(--surface); transform: translateY(-1px); }
+  .opt-btn:active { transform: translateY(0) scale(0.98); }
+  .opt-btn.voted-a { background: var(--accent-a-bg); border-color: var(--accent-a); color: #a09bff; }
+  .opt-btn.voted-b { background: var(--accent-b-bg); border-color: var(--accent-b); color: #00c9a7; }
+
+  .vs-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  /* results */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 1.25rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .result-side {
+    border-radius: var(--radius);
+    border: 1px solid;
+    padding: 12px;
+  }
+
+  .result-side.side-a { border-color: var(--accent-a); background: var(--accent-a-bg); }
+  .result-side.side-b { border-color: var(--accent-b); background: var(--accent-b-bg); }
+
+  .result-option-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .side-a .result-option-label { color: #a09bff; }
+  .side-b .result-option-label { color: #00c9a7; }
+
+  .voter-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    margin: 2px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .side-a .voter-tag { background: rgba(108,99,255,0.18); color: #c3beff; }
+  .side-b .voter-tag { background: rgba(0,201,167,0.18); color: #7ff0df; }
+
+  /* nav */
+  .nav-row { display: flex; gap: 8px; margin-top: 0.75rem; }
+  .nav-row .btn:last-child { margin-left: auto; }
+
+  /* summary */
+  .s-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 10px;
+  }
+
+  .s-q-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .s-voters { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .s-label { font-size: 11px; color: var(--text-dim); font-family: 'Space Mono', monospace; margin-right: 4px; }
+
+  /* confetti dots (ambient) */
+  .ambient {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .dot {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.04;
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <div class="dot" style="width:320px;height:320px;background:var(--accent-a);top:-80px;right:-80px;"></div>
+  <div class="dot" style="width:220px;height:220px;background:var(--accent-b);bottom:100px;left:-60px;"></div>
+</div>
+
+<header>
+  <div>
+    <div class="logo">this<span class="slash">/</span>that</div>
+    <div class="logo-tag">a group icebreaker game</div>
+  </div>
+</header>
+
+<!-- JOIN SCREEN -->
+<div id="screen-join" class="screen active">
+  <div class="card">
+    <div class="eyebrow">step 1 — add players</div>
+    <h2>who's playing?</h2>
+    <p>everyone adds their name before the game starts — no accounts, no sign-in.</p>
+    <div class="input-row">
+      <input type="text" id="name-input" placeholder="your name..." maxlength="20" autocomplete="off" />
+      <button class="btn btn-accent" onclick="addPlayer()">add me</button>
+    </div>
+    <div class="players-row" id="players-list"></div>
+    <div class="hint" id="join-hint">add at least 2 players to start</div>
+    <div class="divider"></div>
+    <button class="btn btn-accent btn-full" id="start-btn" onclick="startGame()" style="display:none">
+      let's go →
+    </button>
+  </div>
+
+  <div class="card" style="border-style:dashed;border-color:var(--border);">
+    <div class="eyebrow">how to play</div>
+    <p style="margin-bottom:0.5rem">each round, pick your name, then tap your answer. you'll see exactly who picked what — instantly.</p>
+    <p>20 questions across nostalgia, pop culture, space, drinks & lifestyle.</p>
+  </div>
+</div>
+
+<!-- VOTE SCREEN -->
+<div id="screen-vote" class="screen">
+  <div class="meta-row">
+    <span class="meta-label" id="q-counter">01 / 20</span>
+    <span class="meta-label" id="vote-tally">0/0 voted</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:5%"></div></div>
+
+  <div class="q-card">
+    <div class="eyebrow" id="q-cat">category</div>
+    <div class="q-text" id="q-text">loading…</div>
+
+    <div class="who-label">who's voting?</div>
+    <div class="player-grid" id="player-grid"></div>
+    <div class="waiting-msg" id="waiting-msg"></div>
+
+    <div class="vs-grid">
+      <button class="opt-btn" id="btn-a" onclick="castVote('a')"></button>
+      <div class="vs-badge">or</div>
+      <button class="opt-btn" id="btn-b" onclick="castVote('b')"></button>
+    </div>
+
+    <div class="result-grid" id="result-grid" style="display:none">
+      <div class="result-side side-a">
+        <div class="result-option-label" id="rl-a"></div>
+        <div id="voters-a"></div>
+      </div>
+      <div class="result-side side-b">
+        <div class="result-option-label" id="rl-b"></div>
+        <div id="voters-b"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn" id="prev-btn" onclick="go(-1)">← back</button>
+    <button class="btn" id="next-btn" onclick="go(1)">next →</button>
+  </div>
+</div>
+
+<!-- SUMMARY SCREEN -->
+<div id="screen-summary" class="screen">
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="eyebrow">all done</div>
+    <h2>here's what everyone chose</h2>
+    <p>scroll through to see the full picture.</p>
+  </div>
+  <div id="summary-list"></div>
+  <button class="btn btn-accent btn-full" onclick="restart()">play again</button>
+</div>
+
+<script>
+const QS = [
+  { cat:"90s nostalgia",  text:"MTV or Cartoon Network?",           a:"MTV",             b:"Cartoon Network" },
+  { cat:"90s nostalgia",  text:"Spice Girls or Backstreet Boys?",   a:"Spice Girls",     b:"Backstreet Boys" },
+  { cat:"90s nostalgia",  text:"Tamagotchi or Game Boy?",           a:"Tamagotchi",      b:"Game Boy" },
+  { cat:"90s nostalgia",  text:"Friends or Seinfeld?",              a:"Friends",         b:"Seinfeld" },
+  { cat:"2000s vibes",    text:"MySpace or Facebook?",              a:"MySpace",         b:"Facebook" },
+  { cat:"2000s vibes",    text:"iPod or Discman?",                  a:"iPod",            b:"Discman" },
+  { cat:"2000s vibes",    text:"Harry Potter or Lord of the Rings?",a:"Harry Potter",    b:"Lord of the Rings" },
+  { cat:"2000s vibes",    text:"MSN Messenger or AIM?",             a:"MSN Messenger",   b:"AIM" },
+  { cat:"pop culture",    text:"Marvel or DC?",                     a:"Marvel",          b:"DC" },
+  { cat:"pop culture",    text:"Netflix binge or cinema night?",    a:"Netflix binge",   b:"Cinema night" },
+  { cat:"pop culture",    text:"Taylor Swift or Beyoncé?",          a:"Taylor Swift",    b:"Beyoncé" },
+  { cat:"pop culture",    text:"TikTok or YouTube?",                a:"TikTok",          b:"YouTube" },
+  { cat:"space & STEM",   text:"Visit the Moon or Mars?",           a:"Moon",            b:"Mars" },
+  { cat:"space & STEM",   text:"SpaceX or NASA?",                   a:"SpaceX",          b:"NASA" },
+  { cat:"space & STEM",   text:"Aliens exist or we're alone?",      a:"Aliens exist",    b:"We're alone" },
+  { cat:"space & STEM",   text:"Time travel or teleportation?",     a:"Time travel",     b:"Teleportation" },
+  { cat:"drinks & food",  text:"Coffee or tea?",                    a:"Coffee",          b:"Tea" },
+  { cat:"drinks & food",  text:"Kymyz or kombucha?",                a:"Kymyz",           b:"Kombucha" },
+  { cat:"lifestyle",      text:"Early bird or night owl?",          a:"Early bird",      b:"Night owl" },
+  { cat:"lifestyle",      text:"Mountains or beach?",               a:"Mountains",       b:"Beach" },
+];
+
+let players = [];
+let votes = QS.map(() => ({ a: [], b: [] }));
+let qi = 0;
+let current = null;
+
+const $ = id => document.getElementById(id);
+
+function addPlayer() {
+  const inp = $('name-input');
+  const name = inp.value.trim();
+  if (!name || players.find(p => p.toLowerCase() === name.toLowerCase())) { inp.focus(); return; }
+  players.push(name);
+  inp.value = '';
+  inp.focus();
+  renderChips();
+  updateJoin();
+}
+
+function removePlayer(name) {
+  players = players.filter(p => p !== name);
+  renderChips();
+  updateJoin();
+}
+
+function renderChips() {
+  $('players-list').innerHTML = players.map(p =>
+    `<span class="chip">${p}<span class="x" onclick="removePlayer('${esc(p)}')">×</span></span>`
+  ).join('');
+}
+
+function updateJoin() {
+  const sb = $('start-btn');
+  const hint = $('join-hint');
+  if (players.length >= 2) {
+    sb.style.display = 'flex';
+    hint.textContent = players.length + ' player' + (players.length !== 1 ? 's' : '') + ' ready';
+  } else {
+    sb.style.display = 'none';
+    hint.textContent = 'add at least 2 players to start';
+  }
+}
+
+function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function startGame() { show('screen-vote'); qi = 0; renderQ(); }
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function renderQ() {
+  const q = QS[qi];
+  $('q-counter').textContent = String(qi+1).padStart(2,'0') + ' / ' + QS.length;
+  $('q-cat').textContent = q.cat;
+  $('q-text').textContent = q.text;
+  $('btn-a').textContent = q.a;
+  $('btn-b').textContent = q.b;
+  $('btn-a').className = 'opt-btn';
+  $('btn-b').className = 'opt-btn';
+  $('progress-fill').style.width = ((qi+1)/QS.length*100) + '%';
+  $('prev-btn').disabled = qi === 0;
+  $('next-btn').textContent = qi === QS.length-1 ? 'see results →' : 'next →';
+  current = null;
+  renderGrid();
+  renderResultBox();
+}
+
+function renderGrid() {
+  const v = votes[qi];
+  const all = [...v.a, ...v.b];
+  $('player-grid').innerHTML = players.map(p => {
+    const done = all.includes(p);
+    const active = p === current ? 'active' : '';
+    const cls = done ? 'done' : active;
+    return `<button class="player-btn ${cls}" onclick="pickPlayer('${esc(p)}')">${p}</button>`;
+  }).join('');
+
+  const total = all.length;
+  $('vote-tally').textContent = total + '/' + players.length + ' voted';
+
+  const waiting = players.filter(p => !all.includes(p));
+  const wm = $('waiting-msg');
+  if (waiting.length === 0) { wm.textContent = 'everyone has voted!'; }
+  else if (waiting.length < players.length) { wm.textContent = 'still waiting: ' + waiting.join(', '); }
+  else { wm.textContent = ''; }
+}
+
+function pickPlayer(name) {
+  const all = [...votes[qi].a, ...votes[qi].b];
+  if (all.includes(name)) return;
+  current = name;
+  renderGrid();
+}
+
+function castVote(side) {
+  if (!current) { shakeGrid(); return; }
+  const v = votes[qi];
+  v.a = v.a.filter(p => p !== current);
+  v.b = v.b.filter(p => p !== current);
+  v[side].push(current);
+  current = null;
+  renderGrid();
+  renderResultBox();
+}
+
+function shakeGrid() {
+  const g = $('player-grid');
+  g.style.transition = 'transform 0.06s';
+  let i = 0;
+  const dirs = [4,-4,3,-3,2,-2,0];
+  const tick = () => {
+    if (i >= dirs.length) { g.style.transform = ''; return; }
+    g.style.transform = `translateX(${dirs[i++]}px)`;
+    setTimeout(tick, 50);
+  };
+  tick();
+}
+
+function renderResultBox() {
+  const v = votes[qi]; const q = QS[qi];
+  const total = v.a.length + v.b.length;
+  const rg = $('result-grid');
+  if (total === 0) { rg.style.display = 'none'; return; }
+  rg.style.display = 'grid';
+  $('rl-a').textContent = q.a + ' (' + v.a.length + ')';
+  $('rl-b').textContent = q.b + ' (' + v.b.length + ')';
+  $('voters-a').innerHTML = v.a.map(p => `<span class="voter-tag">${p}</span>`).join('');
+  $('voters-b').innerHTML = v.b.map(p => `<span class="voter-tag">${p}</span>`).join('');
+}
+
+function go(dir) {
+  const next = qi + dir;
+  if (next < 0) return;
+  if (next >= QS.length) { buildSummary(); show('screen-summary'); return; }
+  qi = next; renderQ();
+}
+
+function buildSummary() {
+  const el = $('summary-list');
+  el.innerHTML = QS.map((q, i) => {
+    const v = votes[i];
+    const total = v.a.length + v.b.length;
+    const aHtml = v.a.map(p => `<span class="voter-tag" style="background:rgba(108,99,255,0.18);color:#c3beff">${p}</span>`).join('');
+    const bHtml = v.b.map(p => `<span class="voter-tag" style="background:rgba(0,201,167,0.18);color:#7ff0df">${p}</span>`).join('');
+    const skipped = total === 0 ? '<span style="font-size:12px;color:var(--text-dim)">skipped</span>' : '';
+    return `<div class="s-card">
+      <div class="eyebrow">${q.cat}</div>
+      <div class="s-q-text">${q.text}</div>
+      <div class="s-voters">
+        ${v.a.length ? `<span class="s-label">${q.a}</span>${aHtml}` : ''}
+        ${v.b.length ? `<span class="s-label" style="margin-left:${v.a.length?'10px':'0'}">${q.b}</span>${bHtml}` : ''}
+        ${skipped}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function restart() {
+  votes = QS.map(() => ({ a: [], b: [] }));
+  qi = 0; current = null;
+  show('screen-join');
+}
+
+$('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+</script>
+</body>
+</html>
